@@ -2,58 +2,34 @@ import pygame
 import time
 import math
 import random
+from car import *
+from obstacle import *
 
 WIDTH, HEIGHT = 1200, 600
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("CarsAI")
 
-CAR_IMAGE = pygame.image.load("Assets/red-car.png")
-CAR_IMAGE = pygame.transform.scale(CAR_IMAGE, (20, 40))
-BACKGROUND = pygame.image.load("Assets/Background.jfif")
-BACKGROUND = pygame.transform.scale(BACKGROUND, (WIDTH, HEIGHT))
-
 FPS = 60
 START_POS = 10, 290
+NUM_OF_CARS = 50
+OBS_WIDTH = 50
+OBS_HEIGHT = 300
 
-class Car:
-    def __init__(self, max_vel, rotation_vel):
-        self.img = CAR_IMAGE
-        self.posX, self.posY = START_POS
-        self.max_vel = max_vel
-        self.velocity = 0
-        self.rotation_vel = rotation_vel
-        self.acceleration = 0.2
-        self.angle = 270
-
-    def rotate(self, left=False, right=False):
-        if left:
-            self.angle += self.rotation_vel
-        elif right:
-            self.angle -= self.rotation_vel
-
-    def draw(self, win):
-        rotate_center(win, self.img, (self.posX, self.posY), self.angle)
-
-    def move_forward(self):
-        self.velocity = min(self.velocity + self.acceleration, self.max_vel)
-        self.move()
-
-    def move(self):
-        radians = math.radians(self.angle)
-        vertical = math.cos(radians) * self.velocity
-        horizontal = math.sin(radians) * self.velocity
-        
-        self.posY -= vertical
-        self.posX -= horizontal
+CAR_IMAGE = pygame.image.load("Assets/white-car.png")
+CAR_IMAGE = pygame.transform.scale(CAR_IMAGE, (20, 40))
+WALL_IMAGE = pygame.image.load("Assets/wall.jfif")
+WALL_IMAGE = pygame.transform.scale(WALL_IMAGE, (OBS_WIDTH, OBS_HEIGHT))
+BACKGROUND = pygame.image.load("Assets/back.jpg")
+BACKGROUND = pygame.transform.scale(BACKGROUND, (WIDTH, HEIGHT))
+FINISH_LINE = pygame.image.load("Assets/finish.png")
+FINISH_LINE = pygame.transform.scale(FINISH_LINE, (20, 80))
 
 
-def rotate_center(win, image, top_left, angle):
-    rotated_image = pygame.transform.rotate(image, angle)
-    new_rect = rotated_image.get_rect(center=image.get_rect(topleft = top_left).center)
-    win.blit(rotated_image, new_rect.topleft)
-
-def draw(win, cars):
-    win.blit(BACKGROUND, (0,0))
+def draw(win, images, cars):
+    for img, pos in images:
+        win.blit(img, pos)
+    for obstacle in obstacles:
+        obstacle.draw(win)
     for car in cars:
         car.draw(win)
     pygame.display.update()
@@ -62,13 +38,17 @@ def draw(win, cars):
 run = True
 clock = pygame.time.Clock()
 
+images = [(BACKGROUND, (0,0)), (FINISH_LINE, (1180, 260))]
 cars = []
-for x in range (50):
-    cars.append(Car(4,4))
+for x in range (NUM_OF_CARS):
+    cars.append(Car(CAR_IMAGE, START_POS, 4,4))
+obstacles = []
+for x in range (1):
+    obstacles.append(Obstacle(WALL_IMAGE, 600, 150, OBS_WIDTH, OBS_HEIGHT))
 
 while run:
     clock.tick(FPS)
-    draw(WIN, cars)
+    draw(WIN, images, cars)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -76,11 +56,13 @@ while run:
             break
     
     for car in cars:
-        random_val = (random.randint(0, 100))
-        if random_val % 2:
-            car.rotate(left=True)
-        else:
-            car.rotate(right=True)
-        car.move_forward()
+        if car.alive:
+            car.check_collision(obstacles)
+            random_val = (random.randint(0, 100))
+            if random_val % 2:
+                car.rotate(left=True)
+            else:
+                car.rotate(right=True)
+            car.move()
 
 pygame.quit()
