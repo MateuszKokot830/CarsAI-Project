@@ -5,7 +5,7 @@ class Obstacle:
         self.image = image
         self.x, self.y = x, y
         self.width, self.height = width, height
-        self.subsurface = pygame.Surface((self.width, self.height))
+        self.mask = pygame.mask.from_surface(self.image)
 
 
     def draw(self, win):
