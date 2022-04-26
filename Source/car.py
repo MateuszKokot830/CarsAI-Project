@@ -1,8 +1,9 @@
 import pygame
+import numpy 
 import math
 
 class Car:
-    def __init__(self, image, start_pos, velocity, width, height):
+    def __init__(self, image, start_pos, velocity, width, height, sizes):
         self.image = image
         self.mask = pygame.mask.from_surface(self.image)
         self.posX, self.posY = start_pos
@@ -12,6 +13,13 @@ class Car:
         self.alive = True
         self.c1, self.c2, self.c3, self.c4, self.c5 = (0,0), (0,0), (0,0), (0,0), (0,0)
         self.d1, self.d2, self.d3, self.d4, self.d5 = 0, 0, 0, 0, 0
+        self.input = numpy.array([[self.d1], [self.d2], [self.d3], [self.d4], [self.d5]])
+        self.output = numpy.array([[0], [0]])
+        self.score = 0
+        self.sizes = sizes
+        self.layers = len(sizes)
+        self.biases = [numpy.random.randn(y, 1) for y in sizes[1:]]
+        self.weights = [numpy.random.randn(y, x) for x, y in zip(sizes[:-1], sizes[1:])]
 
 
     def rotate(self, turn):
@@ -70,35 +78,35 @@ class Car:
         self.c4 = self.move_lines((self.posX + 10, self.posY + 20), self.angle - 90, 5)
         self.c5 = self.move_lines((self.posX + 10, self.posY + 20), self.angle + 90, 5)
         check1 = True
-        while self.c1[0] < 1200 and self.c1[0] >= 0 and self.c1[1] >= 0 and self.c1[1] < 600 and check1: 
+        while self.c1[0] < 1190 and self.c1[0] >= 10 and self.c1[1] >= 10 and self.c1[1] < 590 and check1: 
             for obstacle in arr:
                 offset = (int(self.c1[0] - obstacle.x), int(self.c1[1] - obstacle.y))
                 if mask.overlap(self.mask, offset) != None: 
                     check1 = False
             self.c1 = self.move_lines((self.c1[0], self.c1[1]), self.angle, 10)
         check2 = True
-        while self.c2[0] < 1200 and self.c2[0] >= 0 and self.c2[1] >= 0 and self.c2[1] < 600 and check2: 
+        while self.c2[0] < 1190 and self.c2[0] >= 10 and self.c2[1] >= 10 and self.c2[1] < 590 and check2: 
             for obstacle in arr:
                 offset = (int(self.c2[0] - obstacle.x), int(self.c2[1] - obstacle.y))
                 if mask.overlap(self.mask, offset) != None: 
                     check2 = False
             self.c2 = self.move_lines((self.c2[0], self.c2[1]), self.angle - 45, 10)
         check3 = True
-        while self.c3[0] < 1200 and self.c3[0] >= 0 and self.c3[1] >= 0 and self.c3[1] < 600 and check3: 
+        while self.c3[0] < 1190 and self.c3[0] >= 10 and self.c3[1] >= 10 and self.c3[1] < 590 and check3: 
             for obstacle in arr:
                 offset = (int(self.c3[0] - obstacle.x), int(self.c3[1] - obstacle.y))
                 if mask.overlap(self.mask, offset) != None: 
                     check3 = False
             self.c3 = self.move_lines((self.c3[0], self.c3[1]), self.angle + 45, 10)
         check4 = True
-        while self.c4[0] < 1200 and self.c4[0] >= 0 and self.c4[1] >= 0 and self.c4[1] < 600 and check4: 
+        while self.c4[0] < 1190 and self.c4[0] >= 10 and self.c4[1] >= 10 and self.c4[1] < 590 and check4: 
             for obstacle in arr:
                 offset = (int(self.c4[0] - obstacle.x), int(self.c4[1] - obstacle.y))
                 if mask.overlap(self.mask, offset) != None: 
                     check4 = False
             self.c4 = self.move_lines((self.c4[0], self.c4[1]), self.angle - 90, 10)
         check5 = True
-        while self.c5[0] < 1200 and self.c5[0] >= 0 and self.c5[1] >= 0 and self.c5[1] < 600 and check5: 
+        while self.c5[0] < 1190 and self.c5[0] >= 10 and self.c5[1] >= 10 and self.c5[1] < 590 and check5: 
             for obstacle in arr:
                 offset = (int(self.c5[0] - obstacle.x), int(self.c5[1] - obstacle.y))
                 if mask.overlap(self.mask, offset) != None: 
@@ -122,3 +130,20 @@ class Car:
         rotated_image = pygame.transform.rotate(image, angle)
         new_rect = rotated_image.get_rect(center=image.get_rect(topleft = top_left).center)
         win.blit(rotated_image, new_rect.topleft)
+
+    def turn_car(self):
+        if self.output.item(0) > 0.5:
+            self.rotate(-5)
+        if self.output.item(1) > 0.5:
+            self.rotate(5)
+        return
+
+    def activation(self, z):
+        return 1.0/(1.0+numpy.exp(-z))
+
+    def feed_forward(self):
+        self.input = numpy.array([[self.d1], [self.d2], [self.d3], [self.d4], [self.d5]])
+        for b, w in zip(self.biases, self.weights):
+            self.input = self.activation(numpy.dot(w, self.input)+b)
+        self.output = self.input
+        return self.output

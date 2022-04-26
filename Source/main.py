@@ -11,11 +11,18 @@ pygame.display.set_caption("CarsAI")
 
 FPS = 30
 START_POS = 10, 290
-NUM_OF_CARS = 2
+NUM_OF_CARS = 50
+VELOCITY = 5
 CAR_WIDTH = 20
 CAR_HEIGHT = 40
 OBS_WIDTH = 50
 OBS_HEIGHT = 200
+
+
+INPUTLAYER = 5
+HIDDENLAYER = 5
+OUTPUTLAYER = 2
+
 
 CAR_IMAGE = pygame.image.load("Assets/white-car.png")
 CAR_IMAGE = pygame.transform.scale(CAR_IMAGE, (CAR_WIDTH, CAR_HEIGHT))
@@ -43,7 +50,7 @@ clock = pygame.time.Clock()
 images = [(BACKGROUND, (0,0)), (FINISH_LINE, (1180, 260))]
 cars = []
 for x in range (NUM_OF_CARS):
-    cars.append(Car(CAR_IMAGE, START_POS, 1, CAR_WIDTH, CAR_HEIGHT))
+    cars.append(Car(CAR_IMAGE, START_POS, VELOCITY, CAR_WIDTH, CAR_HEIGHT, [INPUTLAYER, HIDDENLAYER, OUTPUTLAYER]))
 obstacles = []
 obstacles.append(Obstacle(WALL_IMAGE, 900, 200, OBS_WIDTH, OBS_HEIGHT))
 obstacles.append(Obstacle(WALL_IMAGE, 600, 0, OBS_WIDTH, OBS_HEIGHT))
@@ -68,6 +75,7 @@ while run:
                     car.alive = False
             car.collision_lines(obstacle.mask, obstacles)
             car.calculate_coll_dist()
+            car.feed_farword()
             random_val = (random.randint(0, 100))
             if random_val % 2:
                 car.rotate(5)
