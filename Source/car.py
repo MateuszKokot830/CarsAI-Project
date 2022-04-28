@@ -20,6 +20,8 @@ class Car:
         self.layers = len(sizes)
         self.biases = [numpy.random.randn(y, 1) for y in sizes[1:]]
         self.weights = [numpy.random.randn(y, x) for x, y in zip(sizes[:-1], sizes[1:])]
+        self.mask_offset_X = -6
+        self.mask_offset_Y = 4
 
 
     def rotate(self, turn):
@@ -32,6 +34,11 @@ class Car:
 
     def draw(self, win):
         self.rotate_center(win, self.image, (self.posX, self.posY), self.angle)
+        #---Mask Debug---
+        #rect = self.mask.get_rect()
+        #rect = rect.move(self.posX + self.mask_offset_X, self.posY + self.mask_offset_Y)
+        #col = (100, 100, 100)
+        #pygame.draw.rect(win, col, rect)
         
 
     def draw_lines(self, win):
@@ -57,7 +64,7 @@ class Car:
 
 
     def collision_objects(self, mask, x=0, y=0):
-        offset = (int(self.posX - x), int(self.posY - y))
+        offset = (int(self.posX - x + self.mask_offset_X), int(self.posY - y + self.mask_offset_Y))
         poi = mask.overlap(self.mask, offset)
         return poi
 
@@ -71,47 +78,42 @@ class Car:
         return x, y
 
 
-    def collision_lines(self, mask, arr):
-        self.c1 = self.move_lines((self.posX + 10, self.posY + 20), self.angle, 5)
-        self.c2 = self.move_lines((self.posX + 10, self.posY + 20), self.angle - 45, 5)
-        self.c3 = self.move_lines((self.posX + 10, self.posY + 20), self.angle + 45, 5)
-        self.c4 = self.move_lines((self.posX + 10, self.posY + 20), self.angle - 90, 5)
-        self.c5 = self.move_lines((self.posX + 10, self.posY + 20), self.angle + 90, 5)
+    def collision_lines(self, rect, arr):
+        self.c1 = self.move_lines((self.posX + 10, self.posY + 20), self.angle, 20)
+        self.c2 = self.move_lines((self.posX + 10, self.posY + 20), self.angle - 45, 15)
+        self.c3 = self.move_lines((self.posX + 10, self.posY + 20), self.angle + 45, 15)
+        self.c4 = self.move_lines((self.posX + 10, self.posY + 20), self.angle - 90, 10)
+        self.c5 = self.move_lines((self.posX + 10, self.posY + 20), self.angle + 90, 10)
         check1 = True
-        while self.c1[0] < 1190 and self.c1[0] >= 10 and self.c1[1] >= 10 and self.c1[1] < 590 and check1: 
+        while self.c1[0] < 1200 and self.c1[0] >= 0 and self.c1[1] >= 0 and self.c1[1] < 600 and check1: 
             for obstacle in arr:
-                offset = (int(self.c1[0] - obstacle.x), int(self.c1[1] - obstacle.y))
-                if mask.overlap(self.mask, offset) != None: 
+                if obstacle.rect.collidepoint(self.c1[0], self.c1[1]):
                     check1 = False
-            self.c1 = self.move_lines((self.c1[0], self.c1[1]), self.angle, 10)
+            self.c1 = self.move_lines((self.c1[0], self.c1[1]), self.angle, 2)
         check2 = True
-        while self.c2[0] < 1190 and self.c2[0] >= 10 and self.c2[1] >= 10 and self.c2[1] < 590 and check2: 
+        while self.c2[0] < 1200 and self.c2[0] >= 0 and self.c2[1] >= 0 and self.c2[1] < 600 and check2: 
             for obstacle in arr:
-                offset = (int(self.c2[0] - obstacle.x), int(self.c2[1] - obstacle.y))
-                if mask.overlap(self.mask, offset) != None: 
+                if obstacle.rect.collidepoint(self.c2[0], self.c2[1]):
                     check2 = False
-            self.c2 = self.move_lines((self.c2[0], self.c2[1]), self.angle - 45, 10)
+            self.c2 = self.move_lines((self.c2[0], self.c2[1]), self.angle - 45, 2)
         check3 = True
-        while self.c3[0] < 1190 and self.c3[0] >= 10 and self.c3[1] >= 10 and self.c3[1] < 590 and check3: 
+        while self.c3[0] < 1200 and self.c3[0] >= 0 and self.c3[1] >= 0 and self.c3[1] < 600 and check3: 
             for obstacle in arr:
-                offset = (int(self.c3[0] - obstacle.x), int(self.c3[1] - obstacle.y))
-                if mask.overlap(self.mask, offset) != None: 
+                if obstacle.rect.collidepoint(self.c3[0], self.c3[1]):
                     check3 = False
-            self.c3 = self.move_lines((self.c3[0], self.c3[1]), self.angle + 45, 10)
+            self.c3 = self.move_lines((self.c3[0], self.c3[1]), self.angle + 45, 2)
         check4 = True
-        while self.c4[0] < 1190 and self.c4[0] >= 10 and self.c4[1] >= 10 and self.c4[1] < 590 and check4: 
+        while self.c4[0] < 1200 and self.c4[0] >= 0 and self.c4[1] >= 0 and self.c4[1] < 600 and check4: 
             for obstacle in arr:
-                offset = (int(self.c4[0] - obstacle.x), int(self.c4[1] - obstacle.y))
-                if mask.overlap(self.mask, offset) != None: 
+                if obstacle.rect.collidepoint(self.c4[0], self.c4[1]): 
                     check4 = False
-            self.c4 = self.move_lines((self.c4[0], self.c4[1]), self.angle - 90, 10)
+            self.c4 = self.move_lines((self.c4[0], self.c4[1]), self.angle - 90, 2)
         check5 = True
-        while self.c5[0] < 1190 and self.c5[0] >= 10 and self.c5[1] >= 10 and self.c5[1] < 590 and check5: 
+        while self.c5[0] < 1200 and self.c5[0] >= 0 and self.c5[1] >= 0 and self.c5[1] < 600 and check5: 
             for obstacle in arr:
-                offset = (int(self.c5[0] - obstacle.x), int(self.c5[1] - obstacle.y))
-                if mask.overlap(self.mask, offset) != None: 
+                if obstacle.rect.collidepoint(self.c5[0], self.c5[1]):
                     check5 = False
-            self.c5 = self.move_lines((self.c5[0], self.c5[1]), self.angle + 90, 10)
+            self.c5 = self.move_lines((self.c5[0], self.c5[1]), self.angle + 90, 2)
     
 
     def calculate_dist(self, x1, y1, x2, y2):
@@ -129,6 +131,7 @@ class Car:
     def rotate_center(self, win, image, top_left, angle):
         rotated_image = pygame.transform.rotate(image, angle)
         new_rect = rotated_image.get_rect(center=image.get_rect(topleft = top_left).center)
+        self.mask = pygame.mask.from_surface(rotated_image)
         win.blit(rotated_image, new_rect.topleft)
 
     def turn_car(self):
