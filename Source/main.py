@@ -1,3 +1,4 @@
+from tabnanny import check
 import pygame
 import time
 import math
@@ -44,16 +45,18 @@ def draw(win, images, cars):
         obstacle.draw(win)
     for car in cars:
         car.draw(win)
-        car.draw_lines(win)
+        #car.draw_lines(win)
     pygame.display.update()
 
 run = True
 clock = pygame.time.Clock()
 
 images = [(BACKGROUND, (0,0)), (FINISH_LINE, (FINISH_X , FINISH_Y))]
+
 cars = []
 for x in range (NUM_OF_CARS):
     cars.append(Car(CAR_IMAGE, START_POS, VELOCITY, CAR_WIDTH, CAR_HEIGHT, [INPUTLAYER, HIDDENLAYER, OUTPUTLAYER]))
+
 obstacles = []
 obstacles.append(Obstacle(WALL_IMAGE, 900, 200, OBS_WIDTH, OBS_HEIGHT))
 obstacles.append(Obstacle(WALL_IMAGE, 600, 0, OBS_WIDTH, OBS_HEIGHT))
@@ -69,8 +72,11 @@ while run:
             run = False
             break
     
+    checkEND = True
+
     for car in cars:
         if car.alive:
+            checkEND = False
             for obstacle in obstacles:
                 if car.collision_objects(obstacle.mask, obstacle.x, obstacle.y) != None:
                     car.alive = False
@@ -79,11 +85,14 @@ while run:
             if car.collision_objects(FINISH_MASK, FINISH_X, FINISH_Y):
                 car.alive = False
             if car.alive:
-                random_val = (random.randint(0, 100))
-                if random_val < 33:
-                    car.rotate(5)
-                elif random_val > 66:
-                    car.rotate(-5)
+                car.feed_forward()
+                car.turn_car()
+
+                # random_val = (random.randint(0, 100))
+                # if random_val < 33:
+                #     car.rotate(5)
+                # elif random_val > 66:
+                #     car.rotate(-5)
                 
                 car.move()  
                 car.collision_lines(obstacle.rect, obstacles)
@@ -92,6 +101,11 @@ while run:
     
     draw(WIN, images, cars)
 
+    if (checkEND == True): 
+        cars.clear()
+        for x in range (NUM_OF_CARS):
+            cars.append(Car(CAR_IMAGE, START_POS, VELOCITY, CAR_WIDTH, CAR_HEIGHT, [INPUTLAYER, HIDDENLAYER, OUTPUTLAYER]))
+    
             
 
 pygame.quit()
