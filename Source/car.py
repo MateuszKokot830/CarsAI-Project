@@ -150,3 +150,14 @@ class Car:
             self.input = self.activation(numpy.dot(w, self.input)+b)
         self.output = self.input
         return self.output
+
+    def reset_position(self, start_pos):
+        self.posX, self.posY = start_pos
+        self.angle = 270
+        self.alive = True
+        self.score = 0
+        return
+
+    def calc_fitness(self):
+        self.score = 1/int(self.calculate_dist(self.posX, self.posY, 1190, 300))
+        return
