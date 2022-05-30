@@ -13,9 +13,11 @@ class Car:
         self.alive = True
         self.c1, self.c2, self.c3, self.c4, self.c5 = (0,0), (0,0), (0,0), (0,0), (0,0)
         self.d1, self.d2, self.d3, self.d4, self.d5 = 0, 0, 0, 0, 0
-        self.input = numpy.array([[self.d1], [self.d2], [self.d3], [self.d4], [self.d5]])
-        self.output = numpy.array([[0], [0]])
         self.score = 0
+        self.success = False
+        self.time = 0
+        self.input = numpy.array([[self.d1], [self.d2], [self.d3], [self.d4], [self.d5], [self.score]])
+        self.output = numpy.array([[0], [0]])
         self.sizes = sizes
         self.layers = len(sizes)
         self.biases = [numpy.random.randn(y, 1) for y in sizes[1:]]
@@ -145,7 +147,7 @@ class Car:
         return 1.0/(1.0+numpy.exp(-z))
 
     def feed_forward(self):
-        self.input = numpy.array([[self.d1], [self.d2], [self.d3], [self.d4], [self.d5]])
+        self.input = numpy.array([[self.d1], [self.d2], [self.d3], [self.d4], [self.d5], [self.score]])
         for b, w in zip(self.biases, self.weights):
             self.input = self.activation(numpy.dot(w, self.input)+b)
         self.output = self.input
@@ -159,5 +161,5 @@ class Car:
         return
 
     def calc_fitness(self):
-        self.score = 1/int(self.calculate_dist(self.posX, self.posY, 1190, 300))
+        self.score = 1/int(self.calculate_dist(self.posX, self.posY, 1120, 280))
         return
