@@ -1,12 +1,12 @@
 import pygame
 
 class Obstacle:
-    def __init__(self, image, x, y, width, height):
+    def __init__(self, image, pos, width, height):
         self.image = image
-        self.x, self.y = x, y
+        self.x, self.y = pos
         self.width, self.height = width, height
         self.mask = pygame.mask.from_surface(self.image)
-        self.rect = pygame.Rect(x, y, width, height)
+        self.rect = pygame.Rect(self.x, self.y, width, height)
     
 
 
